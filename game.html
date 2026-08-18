@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hall Pass</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="description" content="Play free browser games on Hall Pass.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Archivo:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <a href="index.html" class="logo">Hall<span>.</span>Pass</a>
+    <div class="masthead-meta" id="crumb"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="player-head">
+    <div>
+      <a href="index.html" class="back">← All games</a>
+      <h1 id="title">Loading…</h1>
+    </div>
+    <button class="fullscreen-btn" id="fs" type="button">Fullscreen</button>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <p class="more-head">More to play</p>
+  <div class="grid" id="more"></div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Hall Pass</span>
+    <span>Games provided by their respective developers</span>
+  </div>
+</footer>
+
+<script src="assets/games.js"></script>
+<script>
+  const slug  = new URLSearchParams(location.search).get("g");
+  const game  = slug ? findGame(slug) : null;
+  const stage = document.getElementById("stage");
+
+  if (!game) {
+    document.getElementById("title").textContent = "Game not found";
+    stage.remove();
+    document.getElementById("fs").remove();
+  } else {
+    document.title = game.name + " — Hall Pass";
+    document.getElementById("title").textContent = game.name;
+    document.getElementById("crumb").textContent = game.cat;
+
+    if (game.ratio === "tall") stage.classList.add("tall");
+
+    const frame = document.createElement("iframe");
+    frame.src = gameUrl(game);
+    frame.title = game.name;
+    frame.setAttribute("allow", "fullscreen; autoplay; gamepad");
+    frame.setAttribute("allowfullscreen", "");
+    frame.setAttribute("scrolling", "no");
+    stage.appendChild(frame);
+
+    document.getElementById("fs").addEventListener("click", () => {
+      if (stage.requestFullscreen) stage.requestFullscreen();
+      else if (stage.webkitRequestFullscreen) stage.webkitRequestFullscreen();
+    });
+  }
+
+  /* --- "more to play": 6 others, shuffled --- */
+  const more = document.getElementById("more");
+  GAMES.filter(g => !game || g.id !== game.id)
+       .sort(() => Math.random() - 0.5)
+       .slice(0, 6)
+       .forEach(g => {
+    const a = document.createElement("a");
+    a.className = "pass";
+    a.href = "game.html?g=" + gameSlug(g);
+    a.innerHTML = `
+      <img class="pass-thumb" src="${gameThumb(g)}" alt="" loading="lazy" width="512" height="384">
+      <div class="pass-body">
+        <div class="pass-no">
+          <span>No. ${String(GAMES.indexOf(g) + 1).padStart(3, "0")}</span>
+          <span class="pass-cat">${g.cat}</span>
+        </div>
+        <p class="pass-name">${g.name}</p>
+      </div>`;
+    more.appendChild(a);
+  });
+</script>
+
+</body>
+</html>

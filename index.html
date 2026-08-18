@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hall Pass — Free Browser Games</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="description" content="A small library of free browser games. No download, no sign-up, works on a school laptop.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Archivo:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <a href="index.html" class="logo">Hall<span>.</span>Pass</a>
+    <div class="masthead-meta" id="counter">— games</div>
+  </div>
+</header>
+
+<main>
+  <section class="wrap hero">
+    <p class="hero-eyebrow">Issued to · Anyone · Valid all period</p>
+    <h1>Twenty-nine games. No download.</h1>
+    <p>Everything here runs in the browser tab you already have open. Pick one, play it, close it.</p>
+  </section>
+
+  <div class="wrap">
+    <div class="filters" id="filters" role="group" aria-label="Filter games by category"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Hall Pass</span>
+    <span>Games provided by their respective developers</span>
+  </div>
+</footer>
+
+<script src="assets/games.js"></script>
+<script>
+  const grid     = document.getElementById("grid");
+  const filters  = document.getElementById("filters");
+  const counter  = document.getElementById("counter");
+  let active     = "All";
+
+  counter.textContent = GAMES.length + " games";
+
+  const cats = ["All", ...[...new Set(GAMES.map(g => g.cat))].sort()];
+
+  cats.forEach(c => {
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.type = "button";
+    b.textContent = c;
+    b.setAttribute("aria-pressed", c === active);
+    b.addEventListener("click", () => {
+      active = c;
+      [...filters.children].forEach(x =>
+        x.setAttribute("aria-pressed", x.textContent === c));
+      render();
+    });
+    filters.appendChild(b);
+  });
+
+  function render() {
+    const list = active === "All" ? GAMES : GAMES.filter(g => g.cat === active);
+    grid.innerHTML = "";
+
+    if (!list.length) {
+      grid.innerHTML = '<p class="empty">Nothing in this category yet.</p>';
+      return;
+    }
+
+    list.forEach((g, i) => {
+      const a = document.createElement("a");
+      a.className = "pass";
+      a.href = "game.html?g=" + gameSlug(g);
+      a.innerHTML = `
+        <img class="pass-thumb" src="${gameThumb(g)}" alt="" loading="lazy" width="512" height="384">
+        <div class="pass-body">
+          <div class="pass-no">
+            <span>No. ${String(GAMES.indexOf(g) + 1).padStart(3, "0")}</span>
+            <span class="pass-cat">${g.cat}</span>
+          </div>
+          <p class="pass-name">${g.name}</p>
+        </div>`;
+      grid.appendChild(a);
+    });
+  }
+
+  render();
+</script>
+
+</body>
+</html>
