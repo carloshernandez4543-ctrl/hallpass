@@ -32,6 +32,11 @@
       </div>
     </div>
 
+    <section class="recent" id="recent" aria-label="Recently played" hidden>
+      <p class="recent-head">Recently played</p>
+      <div class="recent-strip" id="recent-strip"></div>
+    </section>
+
     <div class="grid" id="grid">
       <p class="empty" id="empty" hidden></p>
     </div>
@@ -52,12 +57,51 @@
   const counter = document.getElementById("counter");
   const search  = document.getElementById("q");
   const empty   = document.getElementById("empty");
+  const recent      = document.getElementById("recent");
+  const recentStrip = document.getElementById("recent-strip");
 
   let active = "All";
   let query  = "";
 
   counter.textContent = GAMES.length + " games";
   search.placeholder = "Search " + GAMES.length + " games";
+
+  function makeCard(g, i) {
+    const a = document.createElement("a");
+    a.className = "pass";
+    a.href = "game.html?g=" + gameSlug(g);
+    a.innerHTML = `
+      <img class="pass-thumb" src="${gameThumb(g)}" alt="" loading="lazy" width="512" height="384">
+      <div class="pass-body">
+        <div class="pass-no">
+          <span>No. ${String(i + 1).padStart(3, "0")}</span>
+          <span class="pass-cat">${g.cat}</span>
+        </div>
+        <p class="pass-name">${g.name}</p>
+      </div>`;
+    return a;
+  }
+
+  /* ---------- recently played, from this visitor's own browser ---------- */
+
+  function readRecent() {
+    let ids;
+    try {
+      ids = JSON.parse(localStorage.getItem("hallpass:recent") || "[]");
+    } catch (e) {
+      return [];                     // storage blocked, or unreadable
+    }
+    if (!Array.isArray(ids)) return [];
+    return ids
+      .map(id => GAMES.findIndex(g => g.id === id))
+      .filter(i => i !== -1)         // drop games no longer in the library
+      .slice(0, 6);
+  }
+
+  const recentIdx = readRecent();
+  recentIdx.forEach(i => recentStrip.appendChild(makeCard(GAMES[i], i)));
+
+  /* ---------- category chips ---------- */
 
   const cats = ["All", ...[...new Set(GAMES.map(g => g.cat))].sort()];
 
@@ -79,20 +123,9 @@
   /* Every card is built once. Filtering only toggles visibility, so
      typing in the search box never re-creates the thumbnails. */
   const cards = GAMES.map((g, i) => {
-    const a = document.createElement("a");
-    a.className = "pass";
-    a.href = "game.html?g=" + gameSlug(g);
-    a.innerHTML = `
-      <img class="pass-thumb" src="${gameThumb(g)}" alt="" loading="lazy" width="512" height="384">
-      <div class="pass-body">
-        <div class="pass-no">
-          <span>No. ${String(i + 1).padStart(3, "0")}</span>
-          <span class="pass-cat">${g.cat}</span>
-        </div>
-        <p class="pass-name">${g.name}</p>
-      </div>`;
-    grid.appendChild(a);
-    return { el: a, cat: g.cat, name: g.name.toLowerCase() };
+    const el = makeCard(g, i);
+    grid.appendChild(el);
+    return { el, cat: g.cat, name: g.name.toLowerCase() };
   });
 
   function apply() {
@@ -103,12 +136,17 @@
       c.el.hidden = !hit;
       if (hit) shown++;
     }
+
     empty.hidden = shown > 0;
     if (!shown) {
       empty.textContent = query
         ? "No games match “" + search.value.trim() + "”."
         : "Nothing in this category yet.";
     }
+
+    /* The row is a shortcut for browsing, so it steps out of the way
+       once the visitor is filtering or searching for something. */
+    recent.hidden = recentIdx.length === 0 || active !== "All" || query !== "";
   }
 
   search.addEventListener("input", () => {

@@ -88,8 +88,8 @@ body {
 
 .toolbar {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: flex-start;
+  flex-wrap: nowrap;
   gap: 12px 16px;
   padding: 26px 0 22px;
 }
@@ -103,7 +103,7 @@ body {
 }
 
 .search {
-  flex: 0 0 auto;
+  flex: 0 0 210px;
   margin-left: auto;
 }
 
@@ -182,6 +182,39 @@ body {
   outline-offset: 2px;
 }
 
+/* ---------- recently played : one scrolling row ---------- */
+
+.recent {
+  padding-bottom: 26px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.recent[hidden] { display: none; }
+
+.recent-head {
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--stamp);
+  margin: 0 0 14px;
+}
+
+.recent-strip {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.recent-strip .pass {
+  flex: 0 0 200px;
+  scroll-snap-align: start;
+}
+
 /* ---------- grid of passes ---------- */
 
 .grid {
@@ -236,6 +269,8 @@ body {
   gap: 8px;
   margin-bottom: 5px;
 }
+
+.pass-no span { white-space: nowrap; }
 
 .pass-cat { color: var(--stamp); }
 
@@ -366,6 +401,7 @@ body {
 }
 
 @media (max-width: 620px) {
+  .toolbar { flex-wrap: wrap; }
   .search { flex: 1 1 100%; margin-left: 0; order: -1; }
   .search input { width: 100%; }
 }
@@ -373,4 +409,6 @@ body {
 @media (max-width: 560px) {
   .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 13px; }
   .toolbar { padding: 18px 0 16px; }
+  .recent-strip { gap: 13px; }
+  .recent-strip .pass { flex: 0 0 165px; }
 }

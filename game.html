@@ -55,6 +55,17 @@
     stage.remove();
     document.getElementById("fs").remove();
   } else {
+    /* remember this game for the homepage "Recently played" row.
+       Wrapped because storage can be disabled or full, in which case
+       the row simply never appears. */
+    try {
+      const KEY  = "hallpass:recent";
+      const seen = JSON.parse(localStorage.getItem(KEY) || "[]");
+      const list = Array.isArray(seen) ? seen : [];
+      localStorage.setItem(KEY, JSON.stringify(
+        [game.id, ...list.filter(id => id !== game.id)].slice(0, 12)));
+    } catch (e) { /* no storage, no history */ }
+
     document.title = game.name + " — Hall Pass";
     document.getElementById("title").textContent = game.name;
     document.getElementById("crumb").textContent = game.cat;
