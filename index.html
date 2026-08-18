@@ -25,7 +25,7 @@
 <main>
   <section class="wrap hero">
     <p class="hero-eyebrow">Issued to · Anyone · Valid all period</p>
-    <h1>Twenty-nine games. No download.</h1>
+    <h1 id="hero-count">Free browser games. No download.</h1>
     <p>Everything here runs in the browser tab you already have open. Pick one, play it, close it.</p>
   </section>
 
@@ -50,6 +50,8 @@
   let active     = "All";
 
   counter.textContent = GAMES.length + " games";
+  document.getElementById("hero-count").textContent =
+    GAMES.length + " games. No download.";
 
   const cats = ["All", ...[...new Set(GAMES.map(g => g.cat))].sort()];
 
