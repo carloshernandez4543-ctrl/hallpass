@@ -84,6 +84,29 @@ body {
   color: rgba(242, 239, 228, 0.62);
 }
 
+/* ---------- bookmark nudge ---------- */
+
+.bookmark-tip {
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.07em;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0;
+  padding: 18px 0 0;
+}
+
+.bookmark-tip kbd {
+  font-family: inherit;
+  font-size: 0.95em;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
 /* ---------- toolbar : filter chips + search ---------- */
 
 .toolbar {
@@ -450,11 +473,25 @@ body {
 
 .foot .wrap {
   padding-top: 26px;
-  padding-bottom: 26px;
+  padding-bottom: 12px;
   display: flex;
   justify-content: space-between;
   gap: 14px;
   flex-wrap: wrap;
+}
+
+.foot-legal {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 20px 26px;
+}
+
+.foot-note {
+  max-width: 74ch;
+  margin: 0;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  color: rgba(242, 239, 228, 0.42);
 }
 
 /* ---------- accessibility ---------- */
@@ -472,7 +509,8 @@ body {
 
 @media (max-width: 560px) {
   .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 13px; }
-  .toolbar { padding: 18px 0 16px; }
+  .toolbar { padding: 14px 0 16px; }
+  .bookmark-tip { padding-top: 14px; font-size: 0.64rem; }
   .recent-strip { gap: 13px; }
   .recent-strip .pass { flex: 0 0 165px; }
 }
