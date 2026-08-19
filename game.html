@@ -80,10 +80,47 @@
     frame.setAttribute("scrolling", "no");
     stage.appendChild(frame);
 
-    document.getElementById("fs").addEventListener("click", () => {
-      if (stage.requestFullscreen) stage.requestFullscreen();
-      else if (stage.webkitRequestFullscreen) stage.webkitRequestFullscreen();
-    });
+    /* Fullscreen hides the whole page, so the way out has to live
+       inside the stage. Both controls drive the same state, and the
+       label is set from fullscreenchange rather than from the click,
+       so leaving with Esc keeps everything in sync. */
+    const fsBtn   = document.getElementById("fs");
+    const overlay = document.createElement("div");
+    overlay.className = "stage-overlay";
+    const exitBtn = document.createElement("button");
+    exitBtn.className = "stage-exit";
+    exitBtn.type = "button";
+    exitBtn.textContent = "Exit fullscreen";
+    const hint = document.createElement("span");
+    hint.className = "stage-hint";
+    hint.textContent = "Esc to exit";
+    overlay.append(exitBtn, hint);
+    stage.appendChild(overlay);
+
+    const call = (fn, ctx) => {
+      if (!fn) return;
+      try {
+        const r = fn.call(ctx);
+        if (r && typeof r.catch === "function") r.catch(() => {});
+      } catch (e) { /* refused, syncFs will leave the label alone */ }
+    };
+    const fsTarget = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+    const isFs = () => fsTarget() === stage;
+    const enterFs = () => call(stage.requestFullscreen || stage.webkitRequestFullscreen, stage);
+    const leaveFs = () => call(document.exitFullscreen || document.webkitExitFullscreen, document);
+
+    function syncFs() {
+      const on = isFs();
+      fsBtn.textContent = on ? "Exit fullscreen" : "Fullscreen";
+      fsBtn.setAttribute("aria-pressed", String(on));
+      stage.classList.toggle("is-fullscreen", on);
+    }
+
+    fsBtn.addEventListener("click", () => (isFs() ? leaveFs() : enterFs()));
+    exitBtn.addEventListener("click", leaveFs);
+    document.addEventListener("fullscreenchange", syncFs);
+    document.addEventListener("webkitfullscreenchange", syncFs);
+    syncFs();
   }
 
   /* --- "more to play": 6 others, shuffled --- */
