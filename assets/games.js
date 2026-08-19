@@ -25,7 +25,6 @@ const GAMES = [
   { id: "tmhj9i3trg8ot0u7h9qahh6flzn9zkjp", name: "Obby Cart Rush",                       cat: "Racing",      ratio: "wide" },
   { id: "f18vmxidmr661qlw0sez84ioo303oktj", name: "Zombie Survival Squad",                cat: "Action",      ratio: "wide" },
   { id: "cym6sfm8kebf73562van2bwa2tdz4prh", name: "Fireboy and Watergirl 6",              cat: "2 Player",    ratio: "wide" },
-  { id: "6yovkiqs7z78ayor7opo2dr2c931qmsu", name: "Mine Blade: Online KitPvP",            cat: "Multiplayer", ratio: "wide" },
   { id: "c9ymaapep3zsqe34exm9z3wa3vrhd1ey", name: "Fiva 26: Soccer",                      cat: "Sports",      ratio: "wide" },
   { id: "9qpvw299afzmy7aok2xph76if4npkrg1", name: "Faster Car Race",                      cat: "Racing",      ratio: "wide" },
   { id: "jheblnqcjryfd1dsq5zfx7jhe3xopy2j", name: "Vehicle Rush Master",                  cat: "Racing",      ratio: "wide" },
@@ -218,7 +217,8 @@ const GAMES = [
   { id: "qbsw3x9auxgjncitdcgnat16aptkq4ns", name: "Brainrot World Hole io",               cat: "Casual",      ratio: "wide" },
   { id: "4wnjcp7cea8z1qza1cyw6aj2nmp90q9c", name: "Black Hole io 3D Game",                cat: "Casual",      ratio: "wide" },
   { id: "nipineo4jg3ceojn8zudt1a9s058ypac", name: "Italian Brainrot Tung Sahur Snake.io", cat: "Action",      ratio: "wide" },
-  { id: "tvffgv3xt5p39edpb54kiulbaa86ia21", name: "Neon Ball Slope",                      cat: "Action",      ratio: "wide" }
+  { id: "tvffgv3xt5p39edpb54kiulbaa86ia21", name: "Neon Ball Slope",                      cat: "Action",      ratio: "wide" },
+  { id: "gkeofcoqengjzxlw0b09f2qrng35egbi", name: "Iron Legion",                          cat: "Multiplayer", ratio: "wide" }
 ];
 
 /* --- helpers used by both pages --- */
