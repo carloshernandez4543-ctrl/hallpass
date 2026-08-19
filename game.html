@@ -100,30 +100,57 @@
     overlay.append(exitBtn, hint);
     stage.appendChild(overlay);
 
+    /* iOS Safari has no Fullscreen API for ordinary elements, so the
+       real call would fail silently and the button would look dead.
+       Where it is missing we expand the stage to the viewport with
+       fixed positioning instead, which is a genuine fill rather than a
+       pretend one -- the browser's own chrome simply stays put. */
+    const nativeFs =
+      !!(document.fullscreenEnabled || document.webkitFullscreenEnabled) &&
+      !!(stage.requestFullscreen || stage.webkitRequestFullscreen);
+
+    let expanded = false;   // only consulted when nativeFs is false
+
     const call = (fn, ctx) => {
       if (!fn) return;
       try {
         const r = fn.call(ctx);
         if (r && typeof r.catch === "function") r.catch(() => {});
-      } catch (e) { /* refused, syncFs will leave the label alone */ }
+      } catch (e) { /* refused, sync() will leave the label alone */ }
     };
     const fsTarget = () => document.fullscreenElement || document.webkitFullscreenElement || null;
-    const isFs = () => fsTarget() === stage;
-    const enterFs = () => call(stage.requestFullscreen || stage.webkitRequestFullscreen, stage);
-    const leaveFs = () => call(document.exitFullscreen || document.webkitExitFullscreen, document);
+    const isOpen = () => (nativeFs ? fsTarget() === stage : expanded);
 
-    function syncFs() {
-      const on = isFs();
+    const open = () => {
+      if (nativeFs) call(stage.requestFullscreen || stage.webkitRequestFullscreen, stage);
+      else { expanded = true; sync(); }
+    };
+    const close = () => {
+      if (nativeFs) call(document.exitFullscreen || document.webkitExitFullscreen, document);
+      else { expanded = false; sync(); }
+    };
+
+    function sync() {
+      const on = isOpen();
       fsBtn.textContent = on ? "Exit fullscreen" : "Fullscreen";
       fsBtn.setAttribute("aria-pressed", String(on));
-      stage.classList.toggle("is-fullscreen", on);
+      stage.classList.toggle("is-fullscreen", nativeFs && on);
+      stage.classList.toggle("is-expanded", !nativeFs && on);
+      /* only lock the page behind the fallback; real fullscreen already
+         takes the document out of the flow */
+      document.body.classList.toggle("stage-open", !nativeFs && on);
     }
 
-    fsBtn.addEventListener("click", () => (isFs() ? leaveFs() : enterFs()));
-    exitBtn.addEventListener("click", leaveFs);
-    document.addEventListener("fullscreenchange", syncFs);
-    document.addEventListener("webkitfullscreenchange", syncFs);
-    syncFs();
+    fsBtn.addEventListener("click", () => (isOpen() ? close() : open()));
+    exitBtn.addEventListener("click", close);
+    document.addEventListener("fullscreenchange", sync);
+    document.addEventListener("webkitfullscreenchange", sync);
+    /* the browser handles Esc for real fullscreen but not for the
+       fallback, so cover that case ourselves */
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !nativeFs && expanded) close();
+    });
+    sync();
   }
 
   /* --- "more to play": 6 others, shuffled --- */

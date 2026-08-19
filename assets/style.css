@@ -375,6 +375,25 @@ body {
   border-radius: 0;
 }
 
+/* Fallback for browsers with no Fullscreen API on ordinary elements
+   (iOS Safari). dvh keeps it correct as the address bar collapses;
+   the vh line is the floor for browsers without dvh. */
+.stage.is-expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-width: none;
+  margin: 0;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+}
+
+body.stage-open { overflow: hidden; }
+
 /* the only way out once the page itself is hidden */
 /* Top-centre: the ad network puts its skip control bottom-right, and
    games put HUD in the corners. The strip above the game is usually
@@ -393,7 +412,8 @@ body {
   transition: opacity 0.15s;
 }
 
-.stage.is-fullscreen .stage-overlay { display: flex; }
+.stage.is-fullscreen .stage-overlay,
+.stage.is-expanded .stage-overlay { display: flex; }
 
 .stage-overlay:hover,
 .stage-overlay:focus-within { opacity: 1; }
@@ -418,6 +438,10 @@ body {
 .stage-exit:focus-visible {
   outline: 2px solid #FFF6EF;
   outline-offset: 2px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .stage-hint { display: none; }
 }
 
 .stage-hint {

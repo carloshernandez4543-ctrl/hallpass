@@ -24,9 +24,7 @@
 
 <main>
   <div class="wrap">
-    <p class="bookmark-tip">
-      Bookmark this page &mdash; <kbd id="bookmark-key">Ctrl</kbd> + <kbd>D</kbd> &mdash; so you can find it again.
-    </p>
+    <p class="bookmark-tip" id="bookmark-tip" hidden></p>
 
     <div class="toolbar">
       <div class="filters" id="filters" role="group" aria-label="Filter games by category"></div>
@@ -73,8 +71,32 @@
   counter.textContent = GAMES.length + " games";
   search.placeholder = "Search " + GAMES.length + " games";
 
-  if (/Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent))
-    document.getElementById("bookmark-key").textContent = "\u2318";
+  /* A phone has no Ctrl+D, so the shortcut wording would be a lie
+     there. Branch on whether touch is the primary input, not on the
+     operating system -- a touchscreen laptop still has a keyboard and
+     reports a fine pointer. */
+  (function bookmarkTip() {
+    const tip = document.getElementById("bookmark-tip");
+    const touchFirst = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
+    if (touchFirst) {
+      const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      tip.textContent = iOS
+        ? "Add Hall Pass to your home screen \u2014 tap Share, then Add to Home Screen."
+        : "Add Hall Pass to your home screen from your browser menu.";
+    } else {
+      const mac = /Mac/.test(navigator.platform || navigator.userAgent);
+      const key = (label) => {
+        const k = document.createElement("kbd");
+        k.textContent = label;
+        return k;
+      };
+      tip.append("Bookmark this page \u2014 ", key(mac ? "\u2318" : "Ctrl"), " + ",
+                 key("D"), " \u2014 so you can find it again.");
+    }
+    tip.hidden = false;
+  })();
 
   function makeCard(g, i) {
     const a = document.createElement("a");
