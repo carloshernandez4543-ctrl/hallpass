@@ -213,7 +213,12 @@ const GAMES = [
   { id: "qhwmyfvitm6qscdx5fd2snr06nwjoa1k", name: "Storm Fighter007",                     cat: "Action",      ratio: "wide" },
   { id: "ylqlpf3d9ccsmaro881rph5ri6l4f51r", name: "Oil Tanker Game",                      cat: "Adventure",   ratio: "wide" },
   { id: "dgtesh2xawmouwhi6z5k0wdbpol4m909", name: "Brikzo",                               cat: "Casual",      ratio: "wide" },
-  { id: "yek6als54qfbxd4vx2h26nuq55rt7gt8", name: "Tic tac toe with AI and multiplayer",  cat: "Multiplayer", ratio: "wide" }
+  { id: "yek6als54qfbxd4vx2h26nuq55rt7gt8", name: "Tic tac toe with AI and multiplayer",  cat: "Multiplayer", ratio: "wide" },
+  { id: "21k6yq7qmr0c2807attftweykcvk8e3m", name: "Slither Mini Kingdom",                 cat: "Action",      ratio: "wide" },
+  { id: "qbsw3x9auxgjncitdcgnat16aptkq4ns", name: "Brainrot World Hole io",               cat: "Casual",      ratio: "wide" },
+  { id: "4wnjcp7cea8z1qza1cyw6aj2nmp90q9c", name: "Black Hole io 3D Game",                cat: "Casual",      ratio: "wide" },
+  { id: "nipineo4jg3ceojn8zudt1a9s058ypac", name: "Italian Brainrot Tung Sahur Snake.io", cat: "Action",      ratio: "wide" },
+  { id: "tvffgv3xt5p39edpb54kiulbaa86ia21", name: "Neon Ball Slope",                      cat: "Action",      ratio: "wide" }
 ];
 
 /* --- helpers used by both pages --- */
