@@ -86,25 +86,48 @@ body {
 
 /* ---------- bookmark nudge ---------- */
 
+/* A notice on the pass rather than fine print: paper stock, a rule
+   border, and a stamp-orange bar down the edge. */
 .bookmark-tip {
-  font-family: "Space Mono", ui-monospace, monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.07em;
-  line-height: 1.5;
-  color: var(--ink-soft);
-  margin: 0;
-  padding: 18px 0 0;
+  margin: 24px 0 0;
+  padding: 14px 18px;
+  background: var(--card);
+  border: 1.5px solid var(--rule);
+  border-left: 5px solid var(--stamp);
+  border-radius: var(--radius);
 }
 
-.bookmark-tip kbd {
-  font-family: inherit;
-  font-size: 0.95em;
+.bookmark-tip[hidden] { display: none; }
+
+.bookmark-eyebrow {
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--stamp);
+  margin: 0 0 5px;
+}
+
+.bookmark-line {
+  font-family: "Archivo", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.45;
   color: var(--ink);
-  background: var(--card);
-  border: 1px solid var(--rule);
-  border-bottom-width: 2px;
+  margin: 0;
+}
+
+.bookmark-line kbd {
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.82em;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--rule);
+  border-bottom-width: 3px;
   border-radius: 4px;
-  padding: 1px 5px;
+  padding: 2px 7px;
+  margin: 0 2px;
 }
 
 /* ---------- toolbar : filter chips + search ---------- */
@@ -540,7 +563,8 @@ body.stage-open { overflow: hidden; }
 @media (max-width: 560px) {
   .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 13px; }
   .toolbar { padding: 14px 0 16px; }
-  .bookmark-tip { padding-top: 14px; font-size: 0.64rem; }
+  .bookmark-tip { margin-top: 16px; padding: 12px 14px; }
+  .bookmark-line { font-size: 0.92rem; }
   .recent-strip { gap: 13px; }
   .recent-strip .pass { flex: 0 0 165px; }
 }

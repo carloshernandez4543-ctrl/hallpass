@@ -24,7 +24,10 @@
 
 <main>
   <div class="wrap">
-    <p class="bookmark-tip" id="bookmark-tip" hidden></p>
+    <aside class="bookmark-tip" id="bookmark-tip" hidden>
+      <p class="bookmark-eyebrow">Keep your pass</p>
+      <p class="bookmark-line" id="bookmark-line"></p>
+    </aside>
 
     <div class="toolbar">
       <div class="filters" id="filters" role="group" aria-label="Filter games by category"></div>
@@ -76,13 +79,14 @@
      operating system -- a touchscreen laptop still has a keyboard and
      reports a fine pointer. */
   (function bookmarkTip() {
-    const tip = document.getElementById("bookmark-tip");
+    const tip  = document.getElementById("bookmark-tip");
+    const line = document.getElementById("bookmark-line");
     const touchFirst = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 
     if (touchFirst) {
       const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                   (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-      tip.textContent = iOS
+      line.textContent = iOS
         ? "Add Hall Pass to your home screen \u2014 tap Share, then Add to Home Screen."
         : "Add Hall Pass to your home screen from your browser menu.";
     } else {
@@ -92,8 +96,8 @@
         k.textContent = label;
         return k;
       };
-      tip.append("Bookmark this page \u2014 ", key(mac ? "\u2318" : "Ctrl"), " + ",
-                 key("D"), " \u2014 so you can find it again.");
+      line.append("Bookmark this page \u2014 ", key(mac ? "\u2318" : "Ctrl"), " + ",
+                  key("D"), " \u2014 so you can find it again tomorrow.");
     }
     tip.hidden = false;
   })();
