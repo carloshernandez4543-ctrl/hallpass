@@ -271,6 +271,12 @@ body {
 }
 
 .pass {
+  /* Only cards near the viewport are laid out and painted. The
+     intrinsic height is the real card height at each breakpoint, so
+     the estimate a card is skipped with matches what it becomes.
+     "auto" means the real size is remembered after first render. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 268px;
   position: relative;
   display: block;
   background: var(--card);
@@ -560,7 +566,12 @@ body.stage-open { overflow: hidden; }
   .search input { width: 100%; }
 }
 
+@media (max-width: 1023px) {
+  .pass { contain-intrinsic-size: auto 239px; }
+}
+
 @media (max-width: 560px) {
+  .pass { contain-intrinsic-size: auto 211px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 13px; }
   .toolbar { padding: 14px 0 16px; }
   .bookmark-tip { margin-top: 16px; padding: 12px 14px; }

@@ -10,8 +10,11 @@
 <meta name="description" content="A small library of free browser games. No download, no sign-up, works on a school laptop.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Archivo:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Archivo:wght@400;500;600&family=Space+Mono:wght@400;700&display=optional" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<!-- loaded here so every block below can fill itself in as it is parsed,
+     which is what keeps the layout from shifting after first paint -->
+<script src="assets/games.js"></script>
 </head>
 <body>
 
@@ -21,6 +24,9 @@
     <div class="masthead-meta" id="counter">— games</div>
   </div>
 </header>
+<script>
+  document.getElementById("counter").textContent = GAMES.length + " games";
+</script>
 
 <main>
   <div class="wrap">
@@ -42,9 +48,151 @@
       <div class="recent-strip" id="recent-strip"></div>
     </section>
 
+    <script>
+      /* Everything above the grid is filled in here, while the parser is
+         still short of the grid. Whatever the browser paints first is
+         therefore already final, so nothing below it gets pushed down
+         later -- that shifting was the whole of the CLS problem. */
+      var active = "All";
+      var query  = "";
+      var applyFilters = function () {};   // replaced once the grid exists
+
+      var filters = document.getElementById("filters");
+      var search  = document.getElementById("q");
+      var recent  = document.getElementById("recent");
+
+      search.placeholder = "Search " + GAMES.length + " games";
+
+      function makeCard(g, i) {
+        var a = document.createElement("a");
+        a.className = "pass";
+        a.href = "game.html?g=" + gameSlug(g);
+        a.innerHTML =
+          '<img class="pass-thumb" src="' + gameThumb(g) + '" alt="" loading="lazy" width="512" height="384">' +
+          '<div class="pass-body"><div class="pass-no">' +
+          '<span>No. ' + String(i + 1).padStart(3, "0") + '</span>' +
+          '<span class="pass-cat">' + g.cat + '</span></div>' +
+          '<p class="pass-name">' + g.name + '</p></div>';
+        return a;
+      }
+
+      /* A phone has no Ctrl+D, so the shortcut wording would be a lie
+         there. Branch on whether touch is the primary input, not on the
+         operating system -- a touchscreen laptop still has a keyboard and
+         reports a fine pointer. */
+      (function bookmarkTip() {
+        var tip  = document.getElementById("bookmark-tip");
+        var line = document.getElementById("bookmark-line");
+        var touchFirst = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
+        if (touchFirst) {
+          var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+          line.textContent = iOS
+            ? "Add Hall Pass to your home screen — tap Share, then Add to Home Screen."
+            : "Add Hall Pass to your home screen from your browser menu.";
+        } else {
+          var mac = /Mac/.test(navigator.platform || navigator.userAgent);
+          var key = function (label) {
+            var k = document.createElement("kbd");
+            k.textContent = label;
+            return k;
+          };
+          line.append("Bookmark this page — ", key(mac ? "⌘" : "Ctrl"), " + ",
+                      key("D"), " — so you can find it again tomorrow.");
+        }
+        tip.hidden = false;
+      })();
+
+      /* ---------- recently played, from this visitor's own browser ---------- */
+
+      function readRecent() {
+        var ids;
+        try {
+          ids = JSON.parse(localStorage.getItem("hallpass:recent") || "[]");
+        } catch (e) {
+          return [];                     // storage blocked, or unreadable
+        }
+        if (!Array.isArray(ids)) return [];
+        return ids
+          .map(function (id) { return GAMES.findIndex(function (g) { return g.id === id; }); })
+          .filter(function (i) { return i !== -1; })   // drop games no longer in the library
+          .slice(0, 6);
+      }
+
+      var recentIdx = readRecent();
+      var recentStrip = document.getElementById("recent-strip");
+      recentIdx.forEach(function (i) { recentStrip.appendChild(makeCard(GAMES[i], i)); });
+      recent.hidden = recentIdx.length === 0;
+
+      /* ---------- category chips ---------- */
+
+      var cats = ["All"].concat([...new Set(GAMES.map(function (g) { return g.cat; }))].sort());
+
+      cats.forEach(function (c) {
+        var b = document.createElement("button");
+        b.className = "chip";
+        b.type = "button";
+        b.textContent = c;
+        b.setAttribute("aria-pressed", c === active);
+        b.addEventListener("click", function () {
+          active = c;
+          [...filters.children].forEach(function (x) {
+            x.setAttribute("aria-pressed", x.textContent === c);
+          });
+          applyFilters();
+        });
+        filters.appendChild(b);
+      });
+    </script>
+
     <div class="grid" id="grid">
       <p class="empty" id="empty" hidden></p>
     </div>
+
+    <script>
+      /* The grid is filled before the footer is parsed, so the footer is
+         never laid out against an empty grid and never has to move. */
+      var grid  = document.getElementById("grid");
+      var empty = document.getElementById("empty");
+
+      /* Every card is built once. Filtering only toggles visibility, so
+         typing in the search box never re-creates the thumbnails. */
+      var cards = GAMES.map(function (g, i) {
+        var el = makeCard(g, i);
+        grid.appendChild(el);
+        return { el: el, cat: g.cat, name: g.name.toLowerCase() };
+      });
+
+      applyFilters = function () {
+        var shown = 0;
+        for (var i = 0; i < cards.length; i++) {
+          var c = cards[i];
+          var hit = (active === "All" || c.cat === active) &&
+                    (query === "" || c.name.indexOf(query) !== -1);
+          if (c.el.hidden === hit) c.el.hidden = !hit;   // only touch what changed
+          if (hit) shown++;
+        }
+
+        empty.hidden = shown > 0;
+        if (!shown) {
+          empty.textContent = query
+            ? "No games match “" + search.value.trim() + "”."
+            : "Nothing in this category yet.";
+        }
+
+        /* The row is a shortcut for browsing, so it steps out of the way
+           once the visitor is filtering or searching for something. */
+        recent.hidden = recentIdx.length === 0 || active !== "All" || query !== "";
+      };
+
+      search.addEventListener("input", function () {
+        query = search.value.trim().toLowerCase();
+        applyFilters();
+      });
+
+      applyFilters();
+    </script>
   </div>
 </main>
 
@@ -57,141 +205,6 @@
     <p class="foot-note">Hall Pass provides browser-based games for casual use. It is not affiliated with any school or district.</p>
   </div>
 </footer>
-
-<script src="assets/games.js"></script>
-<script>
-  const grid    = document.getElementById("grid");
-  const filters = document.getElementById("filters");
-  const counter = document.getElementById("counter");
-  const search  = document.getElementById("q");
-  const empty   = document.getElementById("empty");
-  const recent      = document.getElementById("recent");
-  const recentStrip = document.getElementById("recent-strip");
-
-  let active = "All";
-  let query  = "";
-
-  counter.textContent = GAMES.length + " games";
-  search.placeholder = "Search " + GAMES.length + " games";
-
-  /* A phone has no Ctrl+D, so the shortcut wording would be a lie
-     there. Branch on whether touch is the primary input, not on the
-     operating system -- a touchscreen laptop still has a keyboard and
-     reports a fine pointer. */
-  (function bookmarkTip() {
-    const tip  = document.getElementById("bookmark-tip");
-    const line = document.getElementById("bookmark-line");
-    const touchFirst = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-
-    if (touchFirst) {
-      const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-      line.textContent = iOS
-        ? "Add Hall Pass to your home screen \u2014 tap Share, then Add to Home Screen."
-        : "Add Hall Pass to your home screen from your browser menu.";
-    } else {
-      const mac = /Mac/.test(navigator.platform || navigator.userAgent);
-      const key = (label) => {
-        const k = document.createElement("kbd");
-        k.textContent = label;
-        return k;
-      };
-      line.append("Bookmark this page \u2014 ", key(mac ? "\u2318" : "Ctrl"), " + ",
-                  key("D"), " \u2014 so you can find it again tomorrow.");
-    }
-    tip.hidden = false;
-  })();
-
-  function makeCard(g, i) {
-    const a = document.createElement("a");
-    a.className = "pass";
-    a.href = "game.html?g=" + gameSlug(g);
-    a.innerHTML = `
-      <img class="pass-thumb" src="${gameThumb(g)}" alt="" loading="lazy" width="512" height="384">
-      <div class="pass-body">
-        <div class="pass-no">
-          <span>No. ${String(i + 1).padStart(3, "0")}</span>
-          <span class="pass-cat">${g.cat}</span>
-        </div>
-        <p class="pass-name">${g.name}</p>
-      </div>`;
-    return a;
-  }
-
-  /* ---------- recently played, from this visitor's own browser ---------- */
-
-  function readRecent() {
-    let ids;
-    try {
-      ids = JSON.parse(localStorage.getItem("hallpass:recent") || "[]");
-    } catch (e) {
-      return [];                     // storage blocked, or unreadable
-    }
-    if (!Array.isArray(ids)) return [];
-    return ids
-      .map(id => GAMES.findIndex(g => g.id === id))
-      .filter(i => i !== -1)         // drop games no longer in the library
-      .slice(0, 6);
-  }
-
-  const recentIdx = readRecent();
-  recentIdx.forEach(i => recentStrip.appendChild(makeCard(GAMES[i], i)));
-
-  /* ---------- category chips ---------- */
-
-  const cats = ["All", ...[...new Set(GAMES.map(g => g.cat))].sort()];
-
-  cats.forEach(c => {
-    const b = document.createElement("button");
-    b.className = "chip";
-    b.type = "button";
-    b.textContent = c;
-    b.setAttribute("aria-pressed", c === active);
-    b.addEventListener("click", () => {
-      active = c;
-      [...filters.children].forEach(x =>
-        x.setAttribute("aria-pressed", x.textContent === c));
-      apply();
-    });
-    filters.appendChild(b);
-  });
-
-  /* Every card is built once. Filtering only toggles visibility, so
-     typing in the search box never re-creates the thumbnails. */
-  const cards = GAMES.map((g, i) => {
-    const el = makeCard(g, i);
-    grid.appendChild(el);
-    return { el, cat: g.cat, name: g.name.toLowerCase() };
-  });
-
-  function apply() {
-    let shown = 0;
-    for (const c of cards) {
-      const hit = (active === "All" || c.cat === active) &&
-                  (query === "" || c.name.includes(query));
-      c.el.hidden = !hit;
-      if (hit) shown++;
-    }
-
-    empty.hidden = shown > 0;
-    if (!shown) {
-      empty.textContent = query
-        ? "No games match “" + search.value.trim() + "”."
-        : "Nothing in this category yet.";
-    }
-
-    /* The row is a shortcut for browsing, so it steps out of the way
-       once the visitor is filtering or searching for something. */
-    recent.hidden = recentIdx.length === 0 || active !== "All" || query !== "";
-  }
-
-  search.addEventListener("input", () => {
-    query = search.value.trim().toLowerCase();
-    apply();
-  });
-
-  apply();
-</script>
 
 </body>
 </html>
