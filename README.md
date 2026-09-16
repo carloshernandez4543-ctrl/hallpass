@@ -12,6 +12,7 @@ Deploys as-is to Cloudflare Pages.
 - `assets/favicon.svg` + `favicon-32.png` + `apple-touch-icon.png`  site icon
 - `/thumbs`         self-hosted game thumbnails, 400px webp + jpg
 - `tools/`          local-only scripts; nothing in here is deployed
+- `_headers`        Cloudflare cache rules; see Caching below
 
 ## Thumbnails
 
@@ -41,6 +42,37 @@ The page asks for the webp, retries once on the jpg, and then falls back
 to a plain block showing the game's name, so a missing file never
 renders a broken-image icon.
 
+## Caching
+
+`index.html` is served with `max-age=0` and always revalidates, but
+`/assets` used to come back with `max-age=14400`. For four hours after a
+deploy a returning visitor would run fresh HTML against a stale
+`assets/games.js`, every card would throw, and the grid rendered empty
+while the header still said "205 games".
+
+Three things now prevent that, and all three are wanted:
+
+- `_headers` makes `/assets/*` revalidate like the HTML, and lets
+  `/thumbs/*` cache for a year since a thumbnail is keyed by game id and
+  never changes.
+- The HTML references `assets/games.js?v=<hash>`, where the hash is of
+  the file's own bytes. A changed asset is a URL the browser has never
+  cached, which is the only thing that reaches browsers already holding
+  a copy — `_headers` alone cannot, because their cached copy carries
+  the old directive.
+- `index.html` and `game.html` feature-detect the helpers they use from
+  `games.js`, so a mismatch degrades to plain thumbnails instead of an
+  empty grid.
+
+```
+node tools/stamp-assets.mjs           # rewrite the ?v= stamps
+node tools/stamp-assets.mjs --check   # exit 1 if they are stale
+```
+
+`tools/build-games.mjs` re-stamps automatically after it writes
+`games.js`. Run the stamper yourself if you hand-edit `assets/games.js`
+or `assets/style.css`.
+
 ## Bulk import from the GameMonetize feed
 ```
 node tools/build-games.mjs --dry-run   # preview + category breakdown
@@ -56,7 +88,8 @@ so the script requests the full catalogue with `format=json`.
    https://html5.gamemonetize.co/COPY_THIS_PART/
 2. Open assets/games.js, copy any line, paste it, change id + name + cat.
 3. Run `node tools/fetch-thumbs.mjs` so the new game gets a thumbnail.
-4. Save, commit, push. Cloudflare redeploys automatically.
+4. Run `node tools/stamp-assets.mjs` so the cache stamp matches.
+5. Save, commit, push. Cloudflare redeploys automatically.
 
 ## Deploy
 GitHub repo -> Cloudflare Pages -> Connect to Git.

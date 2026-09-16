@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Archivo:wght@400;500;600&family=Space+Mono:wght@400;700&display=optional" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=3393158d">
 </head>
 <body>
 
@@ -47,7 +47,7 @@
   </div>
 </footer>
 
-<script src="assets/games.js"></script>
+<script src="assets/games.js?v=f61463e2"></script>
 <script>
   const slug  = new URLSearchParams(location.search).get("g");
   const game  = slug ? findGame(slug) : null;
@@ -153,6 +153,17 @@
     sync();
   }
 
+  /* gameThumbAlt and thumbFallback live in assets/games.js. A
+     browser holding an older cached copy of that file would throw
+     on them and leave the grid empty -- which is exactly how the
+     live site broke once. Degrade to a plain thumbnail instead. */
+  var altSrcAttr = (typeof gameThumbAlt === "function")
+    ? function (g) { return ' data-alt-src="' + gameThumbAlt(g) + '"'; }
+    : function () { return ""; };
+  var onErrorAttr = (typeof thumbFallback === "function")
+    ? ' onerror="thumbFallback(this)"'
+    : "";
+
   /* --- "more to play": 6 others, shuffled --- */
   const more = document.getElementById("more");
   GAMES.filter(g => !game || g.id !== game.id)
@@ -163,8 +174,8 @@
     a.className = "pass";
     a.href = "game.html?g=" + gameSlug(g);
     a.innerHTML = `
-      <img class="pass-thumb" src="${gameThumb(g)}" data-alt-src="${gameThumbAlt(g)}"
-           data-name="${g.name}" onerror="thumbFallback(this)"
+      <img class="pass-thumb" src="${gameThumb(g)}"${altSrcAttr(g)}
+           data-name="${g.name}"${onErrorAttr}
            alt="" loading="lazy" width="400" height="300">
       <div class="pass-body">
         <div class="pass-no">

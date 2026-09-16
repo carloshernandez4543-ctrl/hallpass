@@ -17,6 +17,7 @@
    ============================================================ */
 
 import { readFileSync, writeFileSync } from 'node:fs';
+import { stamp } from './stamp-assets.mjs';
 
 const FEED = 'https://rss.gamemonetize.com/rssfeed.php?format=json';
 const GAMES_JS = 'assets/games.js';
@@ -258,4 +259,8 @@ if (DRY) {
 } else {
   writeFileSync(GAMES_JS, out);
   console.log(`\nwrote ${GAMES_JS} (${final.length} games)`);
+  /* games.js just changed, so the ?v= stamps in the HTML are stale.
+     Re-stamp here rather than relying on anyone remembering. */
+  const { hashes } = stamp();
+  console.log(`re-stamped the HTML for games.js ?v=${hashes['assets/games.js']}`);
 }

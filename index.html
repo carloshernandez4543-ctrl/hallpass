@@ -11,10 +11,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Archivo:wght@400;500;600&family=Space+Mono:wght@400;700&display=optional" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=3393158d">
 <!-- loaded here so every block below can fill itself in as it is parsed,
      which is what keeps the layout from shifting after first paint -->
-<script src="assets/games.js"></script>
+<script src="assets/games.js?v=f61463e2"></script>
 </head>
 <body>
 
@@ -63,14 +63,25 @@
 
       search.placeholder = "Search " + GAMES.length + " games";
 
+      /* gameThumbAlt and thumbFallback live in assets/games.js. A
+         browser holding an older cached copy of that file would throw
+         on them and leave the grid empty -- which is exactly how the
+         live site broke once. Degrade to a plain thumbnail instead. */
+      var altSrcAttr = (typeof gameThumbAlt === "function")
+        ? function (g) { return ' data-alt-src="' + gameThumbAlt(g) + '"'; }
+        : function () { return ""; };
+      var onErrorAttr = (typeof thumbFallback === "function")
+        ? ' onerror="thumbFallback(this)"'
+        : "";
+
       function makeCard(g, i) {
         var a = document.createElement("a");
         a.className = "pass";
         a.href = "game.html?g=" + gameSlug(g);
         a.innerHTML =
           '<img class="pass-thumb" src="' + gameThumb(g) + '"' +
-          ' data-alt-src="' + gameThumbAlt(g) + '" data-name="' + g.name + '"' +
-          ' onerror="thumbFallback(this)" alt="" loading="lazy" width="400" height="300">' +
+          altSrcAttr(g) + ' data-name="' + g.name + '"' +
+          onErrorAttr + ' alt="" loading="lazy" width="400" height="300">' +
           '<div class="pass-body"><div class="pass-no">' +
           '<span>No. ' + String(i + 1).padStart(3, "0") + '</span>' +
           '<span class="pass-cat">' + g.cat + '</span></div>' +
