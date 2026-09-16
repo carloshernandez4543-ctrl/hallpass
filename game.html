@@ -163,7 +163,9 @@
     a.className = "pass";
     a.href = "game.html?g=" + gameSlug(g);
     a.innerHTML = `
-      <img class="pass-thumb" src="${gameThumb(g)}" alt="" loading="lazy" width="512" height="384">
+      <img class="pass-thumb" src="${gameThumb(g)}" data-alt-src="${gameThumbAlt(g)}"
+           data-name="${g.name}" onerror="thumbFallback(this)"
+           alt="" loading="lazy" width="400" height="300">
       <div class="pass-body">
         <div class="pass-no">
           <span>No. ${String(GAMES.indexOf(g) + 1).padStart(3, "0")}</span>

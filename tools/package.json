@@ -1,0 +1,9 @@
+{
+  "name": "hallpass-tools",
+  "private": true,
+  "type": "module",
+  "description": "Local-only helpers for the Hall Pass site. Nothing here is deployed.",
+  "dependencies": {
+    "sharp": "^0.34.0"
+  }
+}

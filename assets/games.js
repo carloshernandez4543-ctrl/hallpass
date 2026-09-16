@@ -223,6 +223,29 @@ const GAMES = [
 
 /* --- helpers used by both pages --- */
 const gameUrl  = g => `https://html5.gamemonetize.co/${g.id}/`;
-const gameThumb = g => `https://img.gamemonetize.com/${g.id}/512x384.jpg`;
+
+/* Thumbnails are served from this domain rather than from
+   img.gamemonetize.com, which some school filters block even where the
+   games themselves load fine. Run tools/fetch-thumbs.mjs after adding a
+   game to pull its thumbnail into /thumbs. */
+const gameThumb    = g => `thumbs/${g.id}.webp`;
+const gameThumbAlt = g => `thumbs/${g.id}.jpg`;
+
+/* One retry on the jpg, which covers a browser too old for webp, then a
+   plain block carrying the game's name so a file that never arrives
+   shows something readable instead of a broken-image icon. */
+function thumbFallback(img) {
+  const alt = img.getAttribute("data-alt-src");
+  if (alt) {
+    img.removeAttribute("data-alt-src");
+    img.src = alt;
+    return;
+  }
+  const block = document.createElement("div");
+  block.className = "pass-thumb pass-thumb-missing";
+  block.textContent = img.getAttribute("data-name") || "";
+  img.replaceWith(block);
+}
+
 const gameSlug = g => g.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const findGame = slug => GAMES.find(g => gameSlug(g) === slug);

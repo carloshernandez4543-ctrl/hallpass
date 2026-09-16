@@ -1,3 +1,7 @@
 .DS_Store
 ._*
 Thumbs.db
+
+# local-only tooling; /thumbs itself IS committed
+tools/node_modules/
+tools/.thumb-cache/

@@ -309,6 +309,25 @@ body {
   border-bottom: 1.5px dashed var(--rule); /* perforation */
 }
 
+/* stands in for a thumbnail that never arrived, so the card still
+   says what the game is instead of showing a broken-image icon.
+   Declared after .pass-thumb so its display wins. */
+.pass-thumb-missing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  text-align: center;
+  background: var(--board);
+  color: rgba(242, 239, 228, 0.92);
+  font-family: "Bricolage Grotesque", "Archivo", sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+}
+
 .pass-body { padding: 12px 13px 14px; }
 
 .pass-no {
